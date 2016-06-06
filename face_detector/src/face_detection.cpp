@@ -60,6 +60,7 @@
 #include "sensor_msgs/image_encodings.h"
 #include "cv_bridge/cv_bridge.h"
 #include "tf/transform_listener.h"
+#include "tf/transform_broadcaster.h"
 #include "sensor_msgs/PointCloud.h"
 #include "geometry_msgs/Point32.h"
 
@@ -599,6 +600,14 @@ private:
       people_msgs::PositionMeasurement pos;
       people_msgs::PositionMeasurementArray pos_array;
 
+      // setup of tf
+      static tf::TransformBroadcaster br;
+      tf::Transform transform;
+
+      tf::Quaternion q(0,0,0,1.0);
+      // q.setRPY(0, 3.14, 0);
+      transform.setRotation(q);
+
       for (uint iface = 0; iface < faces_vector.size(); iface++)
       {
         one_face = &faces_vector[iface];
@@ -661,6 +670,9 @@ private:
           result_.face_positions.push_back(pos);
           found_faces = true;
 
+          // publish tf
+          transform.setOrigin( tf::Vector3(pos.pos.x, pos.pos.y, pos.pos.z) );
+          br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), cloud.header.frame_id, "face_position" + pos.object_id));
         }
 
       }
