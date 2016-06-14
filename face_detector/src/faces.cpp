@@ -42,6 +42,11 @@
 #include <cfloat>
 #include <algorithm>
 
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
+#include <dlib/image_processing.h>
+#include <dlib/opencv.h>
+
 namespace people
 {
 
@@ -49,6 +54,7 @@ Faces::Faces():
   list_(NULL),
   cam_model_(NULL)
 {
+    face_detector_ = dlib::get_frontal_face_detector();
 }
 
 Faces::~Faces()
@@ -172,6 +178,15 @@ void Faces::faceDetectionThreadDisparity(uint i)
 
     std::vector<cv::Rect> faces_vec;
     cascade_.detectMultiScale(cv_image_gray_, faces_vec,  1.2, 2, CV_HAAR_DO_CANNY_PRUNING, cv::Size(this_min_face_size, this_min_face_size));
+    dlib::cv_image<uchar> tmp_image(cv_image_gray_);
+    std::vector<dlib::rectangle> dets = face_detector_(tmp_image);
+    for(uint iface=0; iface < dets.size(); ++iface) {
+        uint x = dets[i].left();
+        uint y = dets[i].top();
+        uint width = dets[i].right() - dets[i].left();
+        uint height = dets[i].bottom() - dets[i].top();
+        faces_vec.push_back(cv::Rect(x, y, width, height));
+    }
 
     // Filter the faces using depth information, if available. Currently checks that the actual face size is within the given limits.
     cv::Scalar color(0, 255, 0);

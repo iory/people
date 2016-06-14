@@ -59,6 +59,10 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
 
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
+#include <dlib/image_processing.h>
+#include <dlib/opencv.h>
 
 using namespace std;
 
@@ -193,6 +197,8 @@ private:
 
   /* Structures for the face detector. */
   cv::CascadeClassifier cascade_;  /**< Classifier cascade for face detection. */
+  /* Structures for the face detector by dlib. */
+  dlib::frontal_face_detector face_detector_;
 
   void faceDetectionThreadDisparity(uint i);
   void faceDetectionThreadDepth(uint i);
@@ -202,4 +208,3 @@ private:
 };
 
 #endif
-
